@@ -1,0 +1,68 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenAI Chatbot</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ 
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=54p4qAwT"></script>
+
+</head>
+<body>
+  <h1>OpenAI Chatbot</h1>
+  <form id="chat-form">
+    <label for="message">Message:</label>
+    <input type="text" id="message" name="message" required>
+    <button type="button" id="record">Record</button>
+
+    <button type="submit">Send</button>
+  </form>
+  <div id="chat-history"></div>
+
+
+<script>
+$(document).ready(function() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = 'ar';
+
+  $("#record").on("click", function() {
+    recognition.start();
+  });
+
+  recognition.addEventListener("result", function(event) {
+    const transcript = event.results[0][0].transcript;
+    $("#message").val(transcript);
+  });
+
+  function speak(text) {
+  responsiveVoice.speak(text, "Arabic Female");
+}
+
+
+$("#chat-form").on("submit", async function (event) {
+  event.preventDefault();
+
+  const message = $("#message").val();
+  $("#message").val("");
+  $("#chat-history").append(`<p><b>You:</b> ${message}</p>`);
+
+  try {
+    const response = await $.post("/chat", { message: message });
+    const reply = response.reply;
+    $("#chat-history").append(`<p><b>Chatbot:</b> ${reply}</p>`);
+    speak(reply);
+  } catch (error) {
+    console.error("Error:", error);
+    $("#chat-history").append(`<p><b>Chatbot:</b> عذراً، لا يمكنني الرد حالياً.</p>`);
+  }
+});
+
+});
+</script>
+
+  
+</body>
+</html>
